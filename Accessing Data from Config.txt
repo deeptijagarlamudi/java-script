@@ -1,0 +1,133 @@
+To store common data across environments in a React app, there are several effective ways depending on your setup and the nature of the data. Here are some practical approaches:
+
+### 1. **Environment Variables**
+
+If you have data that might change across environments (e.g., API URLs), storing them in environment files (`.env`) is a common approach. React requires all environment variables to start with `REACT_APP_`.
+
+1. Create different `.env` files for each environment:
+   - `.env` (common across all environments)
+   - `.env.development`
+   - `.env.production`
+   - `.env.test`
+
+   ```plaintext
+   # .env (common)
+   REACT_APP_COMMON_KEY=some_common_value
+
+   # .env.development
+   REACT_APP_API_URL=https://dev-api.example.com
+
+   # .env.production
+   REACT_APP_API_URL=https://api.example.com
+   ```
+
+2. Access these variables in your app as `process.env.REACT_APP_*`:
+
+   ```javascript
+   const apiUrl = process.env.REACT_APP_API_URL;
+   const commonKey = process.env.REACT_APP_COMMON_KEY;
+   ```
+
+### 2. **JSON Configuration Files**
+
+If the data is more complex or structured, you could store it in a JSON configuration file and import it where needed.
+
+1. Create a `config` folder with files for each environment:
+
+   - `config/common.json`
+   - `config/development.json`
+   - `config/production.json`
+
+2. Example `common.json`:
+
+   ```json
+   {
+     "commonKey": "some_common_value",
+     "otherData": "common data across environments"
+   }
+   ```
+
+   Example `development.json`:
+
+   ```json
+   {
+     "apiUrl": "https://dev-api.example.com"
+   }
+   ```
+
+   Example `production.json`:
+
+   ```json
+   {
+     "apiUrl": "https://api.example.com"
+   }
+   ```
+
+3. Load the appropriate JSON based on the environment in your code:
+
+   ```javascript
+   import commonConfig from './config/common.json';
+   import developmentConfig from './config/development.json';
+   import productionConfig from './config/production.json';
+
+   const config = process.env.NODE_ENV === 'production'
+     ? { ...commonConfig, ...productionConfig }
+     : { ...commonConfig, ...developmentConfig };
+
+   export default config;
+   ```
+
+4. Access `config` values in your components:
+
+   ```javascript
+   import config from './config';
+
+   console.log(config.apiUrl);
+   console.log(config.commonKey);
+   ```
+
+### 3. **React Context for Shared Configuration**
+
+If you need the configuration data to be accessible across multiple components and to support reactivity, consider using React Context.
+
+1. Create a context for the configuration:
+
+   ```javascript
+   import React, { createContext, useContext } from 'react';
+   import config from './config';
+
+   const ConfigContext = createContext(config);
+
+   export const ConfigProvider = ({ children }) => (
+     <ConfigContext.Provider value={config}>
+       {children}
+     </ConfigContext.Provider>
+   );
+
+   export const useConfig = () => useContext(ConfigContext);
+   ```
+
+2. Wrap your application in the `ConfigProvider` and access the data with `useConfig()` hook:
+
+   ```javascript
+   import React from 'react';
+   import { ConfigProvider, useConfig } from './ConfigContext';
+
+   const MyComponent = () => {
+     const config = useConfig();
+     return <div>{config.apiUrl}</div>;
+   };
+
+   const App = () => (
+     <ConfigProvider>
+       <MyComponent />
+     </ConfigProvider>
+   );
+
+   export default App;
+   ```
+
+### Choosing the Right Solution
+- **Environment variables**: Good for simple key-value pairs that may vary across environments.
+- **JSON configuration files**: Suitable for structured or complex data that needs to be shared across environments.
+- **React Context**: Ideal for globally accessible configuration that needs to be reactive across components.
