@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAR Flow Diagram Generator</title>
+    <title>HAR Flow Diagram Generator (Edge Compatible)</title>
+    <!-- Load Mermaid.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <style>
         #mermaid {
@@ -11,6 +12,7 @@
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
@@ -20,36 +22,50 @@
     <div id="mermaid"></div>
 
     <script>
-        document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+        // Check if FileReader is supported (for Edge compatibility)
+        if (!window.FileReader) {
+            alert("FileReader API is not supported in this browser. Please use a modern browser.");
+        } else {
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const harData = JSON.parse(e.target.result);
-                    generateMermaidDiagram(harData);
-                };
-                reader.readAsText(file);
+            function handleFileSelect(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var harData;
+                        try {
+                            harData = JSON.parse(e.target.result);
+                            generateMermaidDiagram(harData);
+                        } catch (error) {
+                            alert("Invalid HAR file. Please check the file and try again.");
+                        }
+                    };
+                    reader.readAsText(file);
+                }
             }
-        }
 
-        function generateMermaidDiagram(harData) {
-            let diagram = 'graph TD;\n';
-            const entries = harData.log.entries;
+            function generateMermaidDiagram(harData) {
+                var diagram = 'graph TD;\n';
+                var entries = harData.log.entries;
 
-            entries.forEach((entry, index) => {
-                const requestUrl = entry.request.url.split('/').pop(); // Simplify URL
-                const responseTime = entry.time; // Total time for the request
+                for (var i = 0; i < entries.length; i++) {
+                    var entry = entries[i];
+                    var requestUrl = entry.request.url.split('/').pop(); // Simplify URL
+                    var responseTime = entry.time; // Total time for the request
 
-                diagram += `    A${index}[${requestUrl}] -->|${responseTime} ms| B${index};\n`;
-            });
+                    // Add each entry to the diagram with a unique identifier
+                    diagram += '    A' + i + '[' + requestUrl + '] -->| ' + responseTime + ' ms | B' + i + ';\n';
+                }
 
-            diagram += '    style A0 fill:#f9f,stroke:#333,stroke-width:4px;\n'; // Style the first node
+                // Add basic styling for the first node
+                diagram += '    style A0 fill:#f9f,stroke:#333,stroke-width:4px;\n';
 
-            document.getElementById('mermaid').innerHTML = diagram;
-            mermaid.initialize({ startOnLoad: true });
-            mermaid.init();
+                // Set Mermaid configuration and render
+                document.getElementById('mermaid').innerHTML = diagram;
+                mermaid.initialize({ startOnLoad: false }); // Initialize Mermaid without auto-start
+                mermaid.init(undefined, document.getElementById('mermaid')); // Render the diagram
+            }
         }
     </script>
 </body>
