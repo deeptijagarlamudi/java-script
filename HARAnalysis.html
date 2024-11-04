@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAR Flow Diagram Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        #mermaid {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flow Diagram from HAR File</h1>
+    <input type="file" id="fileInput" accept=".har" />
+    <div id="mermaid"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const harData = JSON.parse(e.target.result);
+                    generateMermaidDiagram(harData);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function generateMermaidDiagram(harData) {
+            let diagram = 'graph TD;\n';
+            const entries = harData.log.entries;
+
+            entries.forEach((entry, index) => {
+                const requestUrl = entry.request.url.split('/').pop(); // Simplify URL
+                const responseTime = entry.time; // Total time for the request
+
+                diagram += `    A${index}[${requestUrl}] -->|${responseTime} ms| B${index};\n`;
+            });
+
+            diagram += '    style A0 fill:#f9f,stroke:#333,stroke-width:4px;\n'; // Style the first node
+
+            document.getElementById('mermaid').innerHTML = diagram;
+            mermaid.initialize({ startOnLoad: true });
+            mermaid.init();
+        }
+    </script>
+</body>
+</html>
