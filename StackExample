@@ -1,0 +1,13 @@
+import java.util.Stack;
+
+public class StackExample {
+    public static void main(String[] args) {
+        Stack<Integer> stack = new Stack<>();
+        
+        stack.add(10);
+        stack.add(20);
+        stack.add(30);
+
+        System.out.println("Top element: " + stack.get(stack.size() - 1)); // Issue
+    }
+}
