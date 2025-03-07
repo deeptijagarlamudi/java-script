@@ -1,0 +1,18 @@
+public class NullPointerExample {
+    public static void main(String[] args) {
+        String input = getUserInput(); // Simulating user input that can be null
+        processInput(input);
+    }
+
+    public static String getUserInput() {
+        return null; // Simulating a case where user input is null
+    }
+
+    public static void processInput(String input) {
+        try {
+            System.out.println("Input Length: " + input.length()); // Possible NullPointerException
+        } catch (Exception e) {
+            System.out.println("Exception caught: " + e.getMessage());
+        }
+    }
+}
