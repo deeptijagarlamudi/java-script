@@ -1,0 +1,14 @@
+import java.util.List;
+
+public class NullCheckIssue {
+    public static void main(String[] args) {
+        List<String> items = getList();
+        for (String item : items) {
+            System.out.println(item.toUpperCase()); // Issue
+        }
+    }
+
+    public static List<String> getList() {
+        return null; // Simulating a case where null is returned
+    }
+}
