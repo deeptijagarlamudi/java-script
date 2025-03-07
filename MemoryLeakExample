@@ -1,0 +1,23 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class MemoryLeakExample {
+    private static Map<Key, String> cache = new HashMap<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 10000; i++) {
+            cache.put(new Key("key" + i), "value" + i);
+        }
+        System.out.println("Cache size: " + cache.size());
+    }
+}
+
+class Key {
+    private String identifier;
+
+    public Key(String identifier) {
+        this.identifier = identifier;
+    }
+
+    // No equals() and hashCode() methods → Memory leak issue
+}
