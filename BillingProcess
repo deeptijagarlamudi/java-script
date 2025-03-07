@@ -1,0 +1,62 @@
+import java.util.*;
+
+public class LegacyBillingSystem {
+    public static void main(String[] args) {
+        List<Order> orders = new ArrayList<>();
+        orders.add(new Order("A123", Arrays.asList(
+                new Item("P001", 2, 100.0),
+                new Item("P002", 1, 50.0)
+        )));
+        orders.add(new Order("B456", Arrays.asList(
+                new Item("P003", 5, 200.0),
+                new Item("P002", 2, 50.0)
+        )));
+
+        InvoiceProcessor ip = new InvoiceProcessor();
+        double finalAmount = ip.p(orders, 0.1); // 10% discount applied
+        System.out.println("Total Amount: " + finalAmount);
+    }
+}
+
+class InvoiceProcessor {
+    public double p(List<Order> ol, double d) {
+        double t = 0.0;
+        for (int i = 0; i < ol.size(); i++) {
+            Order o = ol.get(i);
+            List<Item> il = o.i;
+            for (int j = 0; j < il.size(); j++) {
+                Item item = il.get(j);
+                if (item.p != null && !item.p.isEmpty() && item.q > 0) {
+                    double c = item.q * item.r;
+                    if (item.p.startsWith("P00")) {
+                        c -= (c * d); // Discount applied
+                    }
+                    t += c;
+                }
+            }
+        }
+        return t;
+    }
+}
+
+class Order {
+    String o;
+    List<Item> i;
+
+    public Order(String o, List<Item> i) {
+        this.o = o;
+        this.i = i;
+    }
+}
+
+class Item {
+    String p;
+    int q;
+    double r;
+
+    public Item(String p, int q, double r) {
+        this.p = p;
+        this.q = q;
+        this.r = r;
+    }
+}
